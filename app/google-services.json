@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "826649088396",
+    "firebase_url": "https://androidtest-290ed.firebaseio.com",
+    "project_id": "androidtest-290ed",
+    "storage_bucket": "androidtest-290ed.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826649088396:android:2987abad02287371",
+        "android_client_info": {
+          "package_name": "com.tehnicomsoft.androidtest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "826649088396-6jsmbifu4184ci4lha6gv0rjcvaouabg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8P6YUTOZeyNQPFWrF43YXS-4_mFL5UgM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
