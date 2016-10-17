@@ -13,7 +13,7 @@
         android:layout_marginBottom="2dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:text="asdfasd" />
+        android:text="10:00" />
 
     <TextView
         android:id="@+id/tvMessage"
@@ -29,6 +29,15 @@
         android:paddingRight="10dp"
         android:text="asdfasd"
         android:textColor="@android:color/white" />
+
+    <ImageView
+        android:id="@+id/ivPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/ivImage"
+        android:layout_alignTop="@+id/ivImage"
+        android:layout_marginLeft="10dp"
+        android:layout_toLeftOf="@+id/ivImage" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/ivImage"
