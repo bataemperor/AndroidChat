@@ -15,8 +15,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,9 +26,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
 import com.tehnicomsoft.androidtest.model.Message;
 import com.tehnicomsoft.androidtest.utility.Utility;
 
@@ -50,12 +52,14 @@ public class ChatActivity extends AppCompatActivity {
     FirebaseRecyclerAdapter<Message, MessageHolder> firebaseRecyclerAdapter;
     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     FirebaseStorage storage = FirebaseStorage.getInstance();
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         etText = (EditText) findViewById(R.id.etText);
+        progressBar = (ProgressBar) findViewById(R.id.pb);
         btnSend = (Button) findViewById(R.id.btnSend);
         databaseReference = FirebaseDatabase.getInstance().getReference();
         recyclerView = (RecyclerView) findViewById(R.id.rv);
@@ -78,8 +82,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     protected void populateViewHolder(MessageHolder viewHolder, final Message model, int position) {
                         if (getItemViewType(position) == 2) {
-                            Picasso.with(ChatActivity.this).load(model.getImageUri())
-                                    .into(viewHolder.ivPhoto);
+                            Glide.with(App.get()).load(model.getImageUri()).into(viewHolder.ivPhoto);
                             viewHolder.ivPhoto.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -213,7 +216,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
             UploadTask uploadTask = mountainsRef.putBytes(dataA);
-
+            progressBar.setVisibility(View.VISIBLE);
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
@@ -229,6 +232,14 @@ public class ChatActivity extends AppCompatActivity {
                         databaseReference.child("chat").child("messages").push().setValue(message);
                         sendNotificationToUser("chat", etText.getText().toString());
                     }
+                    progressBar.setVisibility(View.GONE);
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    System.out.println("Upload is " + progress + "% done");
+                    progressBar.setProgress((int) progress);
                 }
             });
 
