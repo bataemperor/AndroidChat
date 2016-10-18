@@ -3,6 +3,7 @@ package com.tehnicomsoft.androidtest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,9 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -53,6 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     SimpleDateFormat sdfFullDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
     FirebaseStorage storage = FirebaseStorage.getInstance();
     ProgressBar progressBar;
+    MediaPlayer mpFriend, mpUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,8 @@ public class ChatActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference();
         recyclerView = (RecyclerView) findViewById(R.id.rv);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mpFriend = MediaPlayer.create(this, R.raw.message);
+        mpUser = MediaPlayer.create(this, R.raw.message);
         btnImg = (Button) findViewById(R.id.btnImg);
         btnImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,13 +82,14 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         firebaseAuth = FirebaseAuth.getInstance();
+
         firebaseRecyclerAdapter =
                 new FirebaseRecyclerAdapter<Message, MessageHolder>(
                         Message.class, R.layout.layout_message_item_friend,
                         MessageHolder.class, databaseReference.child("chat").child("messages")) {
                     @Override
                     protected void populateViewHolder(MessageHolder viewHolder, final Message model, int position) {
-                        if (getItemViewType(position) == 2) {
+                        if (getItemViewType(position) == 2 || getItemViewType(position) == 3) {
                             Glide.with(App.get()).load(model.getImageUri()).into(viewHolder.ivPhoto);
                             viewHolder.ivPhoto.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -177,6 +185,7 @@ public class ChatActivity extends AppCompatActivity {
                 super.onItemRangeInserted(positionStart, itemCount);
                 if (firebaseRecyclerAdapter.getItemCount() != 1)
                     recyclerView.smoothScrollToPosition(firebaseRecyclerAdapter.getItemCount() - 1);
+
             }
 
             @Override
@@ -186,6 +195,34 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         recyclerView.setAdapter(firebaseRecyclerAdapter);
+        databaseReference.child("chat").child("messages").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (!dataSnapshot.getValue(Message.class).getName().equalsIgnoreCase(firebaseAuth.getCurrentUser().getEmail())) {
+                    mpFriend.start();
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 
