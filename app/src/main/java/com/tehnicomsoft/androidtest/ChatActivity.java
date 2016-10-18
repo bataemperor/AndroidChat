@@ -33,7 +33,6 @@ import com.tehnicomsoft.androidtest.model.Message;
 import com.tehnicomsoft.androidtest.utility.Utility;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -50,7 +49,8 @@ public class ChatActivity extends AppCompatActivity {
     EditText etText;
     FirebaseAuth firebaseAuth;
     FirebaseRecyclerAdapter<Message, MessageHolder> firebaseRecyclerAdapter;
-    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+    SimpleDateFormat sdfHourAndMinute = new SimpleDateFormat("HH:mm");
+    SimpleDateFormat sdfFullDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
     FirebaseStorage storage = FirebaseStorage.getInstance();
     ProgressBar progressBar;
 
@@ -98,15 +98,17 @@ public class ChatActivity extends AppCompatActivity {
                                 viewHolder.iv.setVisibility(View.VISIBLE);
                             }
                         }
-
                         viewHolder.tvTime.setText(getTime(position));
-
                     }
 
                     @Override
                     public int getItemViewType(int position) {
-                        if (getItem(position).getImageUri() != null) return 2;
-                        if (getItem(position).getName().equalsIgnoreCase(firebaseAuth.getCurrentUser().getEmail())) {
+                        Message message = getItem(position);
+                        if (message.getImageUri() != null && message.getName().equalsIgnoreCase(firebaseAuth.getCurrentUser().getEmail()))
+                            return 2;
+                        if (message.getImageUri() != null && !message.getName().equalsIgnoreCase(firebaseAuth.getCurrentUser().getEmail()))
+                            return 3;
+                        if (message.getName().equalsIgnoreCase(firebaseAuth.getCurrentUser().getEmail())) {
                             return 0;
                         } else {
                             return 1;
@@ -121,13 +123,18 @@ public class ChatActivity extends AppCompatActivity {
 
                         Calendar calendarYesterday = Calendar.getInstance();
                         calendarYesterday.add(Calendar.DAY_OF_YEAR, -1);
+                        Calendar todayCalendar = Calendar.getInstance();
 
                         StringBuilder stringBuilder = new StringBuilder();
-                        if (calendarYesterday.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) && calendarYesterday.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR)) {
+                        if (calendarYesterday.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
+                                && calendarYesterday.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR)) {
                             stringBuilder.append("Yesterday at ");
+                            stringBuilder.append(sdfHourAndMinute.format(date));
+                        } else if (todayCalendar.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR)) {
+                            stringBuilder.append(sdfHourAndMinute.format(date));
+                        } else {
+                            stringBuilder.append(sdfFullDate.format(date));
                         }
-                        stringBuilder.append(sdf.format(date));
-
                         return stringBuilder.toString();
                     }
 
@@ -146,8 +153,10 @@ public class ChatActivity extends AppCompatActivity {
                                                 (R.layout.layout_message_item_friend, parent, false));
                             case 2:
                                 return new MessageHolder(
-                                        inflater.inflate(R.layout.layout_image, parent, false));
-
+                                        inflater.inflate(R.layout.layout_image_friend, parent, false));
+                            case 3:
+                                return new MessageHolder(
+                                        inflater.inflate(R.layout.layout_image_friend, parent, false));
                             default:
                                 return null;
                         }
